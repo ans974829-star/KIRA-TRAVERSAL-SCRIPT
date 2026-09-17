@@ -1,7 +1,9 @@
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -20,7 +22,7 @@ local function getRootGui()
     end
 end
 
-local existing = getRootGui():FindFirstChild("KiraAnnouncementUI")
+local existing = getRootGui():FindFirstChild("KiraFullscreenNoticeUI")
 if existing then
     existing:Destroy()
 end
@@ -29,7 +31,7 @@ local function playSound(soundId, pitch, vol)
     task.spawn(function()
         local s = Instance.new("Sound")
         s.SoundId = soundId
-        s.Volume = vol or 0.6
+        s.Volume = vol or 0.5
         s.Pitch = pitch or 1
         s.Parent = SoundService
         s:Play()
@@ -56,302 +58,413 @@ local function copyToClipboard(txt)
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "KiraAnnouncementUI"
+ScreenGui.Name = "KiraFullscreenNoticeUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = getRootGui()
 
-local Overlay = Instance.new("TextButton")
-Overlay.Name = "Overlay"
-Overlay.Size = UDim2.new(1, 0, 1, 0)
-Overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Overlay.BackgroundTransparency = 1
-Overlay.Text = ""
-Overlay.AutoButtonColor = false
-Overlay.Parent = ScreenGui
+local FullscreenContainer = Instance.new("Frame")
+FullscreenContainer.Name = "FullscreenContainer"
+FullscreenContainer.Size = UDim2.new(1, 0, 1, 0)
+FullscreenContainer.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
+FullscreenContainer.BackgroundTransparency = 1
+FullscreenContainer.BorderSizePixel = 0
+FullscreenContainer.Parent = ScreenGui
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 560, 0, 620)
-MainFrame.Position = UDim2.new(0.5, -280, 0.5, -270)
-MainFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 14)
-MainFrame.BackgroundTransparency = 1
-MainFrame.ClipsDescendants = true
-MainFrame.Parent = ScreenGui
+local BackgroundGlow1 = Instance.new("ImageLabel")
+BackgroundGlow1.Name = "BackgroundGlow1"
+BackgroundGlow1.Size = UDim2.new(0, 600, 0, 600)
+BackgroundGlow1.Position = UDim2.new(-0.1, 0, -0.1, 0)
+BackgroundGlow1.BackgroundTransparency = 1
+BackgroundGlow1.Image = "rbxassetid://121382843595346"
+BackgroundGlow1.ImageColor3 = Color3.fromRGB(120, 120, 120)
+BackgroundGlow1.ImageTransparency = 1
+BackgroundGlow1.Parent = FullscreenContainer
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
-MainCorner.Parent = MainFrame
+local BackgroundGlow2 = Instance.new("ImageLabel")
+BackgroundGlow2.Name = "BackgroundGlow2"
+BackgroundGlow2.Size = UDim2.new(0, 600, 0, 600)
+BackgroundGlow2.Position = UDim2.new(0.7, 0, 0.5, 0)
+BackgroundGlow2.BackgroundTransparency = 1
+BackgroundGlow2.Image = "rbxassetid://121382843595346"
+BackgroundGlow2.ImageColor3 = Color3.fromRGB(150, 120, 50)
+BackgroundGlow2.ImageTransparency = 1
+BackgroundGlow2.Parent = FullscreenContainer
 
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(45, 45, 45)
-MainStroke.Thickness = 1.2
-MainStroke.Transparency = 1
-MainStroke.Parent = MainFrame
+local MainWrapper = Instance.new("Frame")
+MainWrapper.Name = "MainWrapper"
+MainWrapper.Size = UDim2.new(0, 640, 0, 680)
+MainWrapper.Position = UDim2.new(0.5, -320, 0.5, -300)
+MainWrapper.BackgroundColor3 = Color3.fromRGB(14, 14, 14)
+MainWrapper.BackgroundTransparency = 1
+MainWrapper.ClipsDescendants = false
+MainWrapper.Parent = FullscreenContainer
+
+local WrapperCorner = Instance.new("UICorner")
+WrapperCorner.CornerRadius = UDim.new(0, 16)
+WrapperCorner.Parent = MainWrapper
+
+local WrapperStroke = Instance.new("UIStroke")
+WrapperStroke.Color = Color3.fromRGB(35, 35, 35)
+WrapperStroke.Thickness = 1.5
+WrapperStroke.Transparency = 1
+WrapperStroke.Parent = MainWrapper
+
+local Shadow = Instance.new("ImageLabel")
+Shadow.Name = "Shadow"
+Shadow.Size = UDim2.new(1, 44, 1, 44)
+Shadow.Position = UDim2.new(0, -22, 0, -22)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://121382843595346"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 1
+Shadow.ZIndex = 0
+Shadow.Parent = MainWrapper
 
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 60)
+Header.Size = UDim2.new(1, 0, 0, 80)
 Header.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Header.BackgroundTransparency = 1
 Header.BorderSizePixel = 0
-Header.Parent = MainFrame
-
-local HeaderStroke = Instance.new("UIStroke")
-HeaderStroke.Color = Color3.fromRGB(35, 35, 35)
-HeaderStroke.Thickness = 1
-HeaderStroke.Parent = Header
+Header.Parent = MainWrapper
 
 local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.CornerRadius = UDim.new(0, 16)
 HeaderCorner.Parent = Header
 
 local HeaderFix = Instance.new("Frame")
-HeaderFix.Size = UDim2.new(1, 0, 0, 12)
-HeaderFix.Position = UDim2.new(0, 0, 1, -12)
+HeaderFix.Size = UDim2.new(1, 0, 0, 20)
+HeaderFix.Position = UDim2.new(0, 0, 1, -20)
 HeaderFix.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+HeaderFix.BackgroundTransparency = 1
 HeaderFix.BorderSizePixel = 0
 HeaderFix.Parent = Header
 
 local Logo = Instance.new("ImageLabel")
-Logo.Size = UDim2.new(0, 36, 0, 36)
-Logo.Position = UDim2.new(0, 16, 0.5, -18)
+Logo.Size = UDim2.new(0, 48, 0, 48)
+Logo.Position = UDim2.new(0, 24, 0.5, -24)
 Logo.BackgroundTransparency = 1
 Logo.Image = "rbxassetid://115346308182122"
+Logo.ImageTransparency = 1
 Logo.Parent = Header
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 340, 0, 22)
-Title.Position = UDim2.new(0, 60, 0, 10)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.Text = "Kira Hub | Important Notice"
-Title.TextColor3 = Color3.fromRGB(240, 240, 240)
-Title.TextSize = 16
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = Header
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(0, 400, 0, 24)
+TitleLabel.Position = UDim2.new(0, 84, 0, 18)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "Kira Hub | Important Announcement"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 18
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.TextTransparency = 1
+TitleLabel.Parent = Header
 
-local Subtitle = Instance.new("TextLabel")
-Subtitle.Size = UDim2.new(0, 340, 0, 16)
-Subtitle.Position = UDim2.new(0, 60, 0, 32)
-Subtitle.BackgroundTransparency = 1
-Subtitle.Font = Enum.Font.Gotham
-Subtitle.Text = "~ by kira_scripts.gg • Community Announcement"
-Subtitle.TextColor3 = Color3.fromRGB(140, 140, 140)
-Subtitle.TextSize = 12
-Subtitle.TextXAlignment = Enum.TextXAlignment.Left
-Subtitle.Parent = Header
+local DevLabel = Instance.new("TextLabel")
+DevLabel.Size = UDim2.new(0, 400, 0, 18)
+DevLabel.Position = UDim2.new(0, 84, 0, 42)
+DevLabel.BackgroundTransparency = 1
+DevLabel.Font = Enum.Font.GothamMedium
+DevLabel.Text = "Owner ~ kira_scripts.gg • Community Status Notice"
+DevLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+DevLabel.TextSize = 13
+DevLabel.TextXAlignment = Enum.TextXAlignment.Left
+DevLabel.TextTransparency = 1
+DevLabel.Parent = Header
 
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 32, 0, 32)
-CloseBtn.Position = UDim2.new(1, -44, 0.5, -16)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.Text = "✕"
-CloseBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-CloseBtn.TextSize = 14
-CloseBtn.AutoButtonColor = false
-CloseBtn.Parent = Header
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 36, 0, 36)
+CloseButton.Position = UDim2.new(1, -52, 0.5, -18)
+CloseButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+CloseButton.BackgroundTransparency = 1
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Text = "✕"
+CloseButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+CloseButton.TextSize = 14
+CloseButton.AutoButtonColor = false
+CloseButton.Parent = Header
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 8)
-CloseCorner.Parent = CloseBtn
+CloseCorner.CornerRadius = UDim.new(0, 10)
+CloseCorner.Parent = CloseButton
 
-local ContentScroll = Instance.new("ScrollingFrame")
-ContentScroll.Size = UDim2.new(1, -32, 1, -76)
-ContentScroll.Position = UDim2.new(0, 16, 0, 68)
-ContentScroll.BackgroundTransparency = 1
-ContentScroll.BorderSizePixel = 0
-ContentScroll.ScrollBarThickness = 4
-ContentScroll.ScrollBarImageColor3 = Color3.fromRGB(70, 70, 70)
-ContentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-ContentScroll.Parent = MainFrame
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(1, -48, 1, -112)
+ScrollFrame.Position = UDim2.new(0, 24, 0, 96)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.BorderSizePixel = 0
+ScrollFrame.ScrollBarThickness = 5
+ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollFrame.Parent = MainWrapper
 
-local ContentLayout = Instance.new("UIListLayout")
-ContentLayout.Padding = UDim.new(0, 12)
-ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ContentLayout.Parent = ContentScroll
+local ScrollLayout = Instance.new("UIListLayout")
+ScrollLayout.Padding = UDim.new(0, 16)
+ScrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ScrollLayout.Parent = ScrollFrame
 
-local function updateScroll()
-    ContentScroll.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
+local function adjustCanvasSize()
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ScrollLayout.AbsoluteContentSize.Y + 30)
 end
-ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateScroll)
+ScrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(adjustCanvasSize)
 
-local NoticeCard = Instance.new("Frame")
-NoticeCard.Size = UDim2.new(1, 0, 0, 38)
-NoticeCard.BackgroundColor3 = Color3.fromRGB(28, 22, 12)
-NoticeCard.BorderSizePixel = 0
-NoticeCard.LayoutOrder = 1
-NoticeCard.Parent = ContentScroll
+local AlertCard = Instance.new("Frame")
+AlertCard.Size = UDim2.new(1, 0, 0, 44)
+AlertCard.BackgroundColor3 = Color3.fromRGB(35, 15, 15)
+AlertCard.BackgroundTransparency = 1
+AlertCard.BorderSizePixel = 0
+AlertCard.LayoutOrder = 1
+AlertCard.Parent = ScrollFrame
 
-local NoticeCardCorner = Instance.new("UICorner")
-NoticeCardCorner.CornerRadius = UDim.new(0, 8)
-NoticeCardCorner.Parent = NoticeCard
+local AlertCorner = Instance.new("UICorner")
+AlertCorner.CornerRadius = UDim.new(0, 8)
+AlertCorner.Parent = AlertCard
 
-local NoticeCardStroke = Instance.new("UIStroke")
-NoticeCardStroke.Color = Color3.fromRGB(160, 110, 30)
-NoticeCardStroke.Thickness = 1
-NoticeCardStroke.Parent = NoticeCard
+local AlertStroke = Instance.new("UIStroke")
+AlertStroke.Color = Color3.fromRGB(200, 60, 60)
+AlertStroke.Thickness = 1
+AlertStroke.Transparency = 1
+AlertStroke.Parent = AlertCard
 
-local NoticeCardText = Instance.new("TextLabel")
-NoticeCardText.Size = UDim2.new(1, -20, 1, 0)
-NoticeCardText.Position = UDim2.new(0, 10, 0, 0)
-NoticeCardText.BackgroundTransparency = 1
-NoticeCardText.Font = Enum.Font.GothamMedium
-NoticeCardText.Text = "⏳ This announcement will be removed after 24 hours."
-NoticeCardText.TextColor3 = Color3.fromRGB(255, 200, 90)
-NoticeCardText.TextSize = 13
-NoticeCardText.TextXAlignment = Enum.TextXAlignment.Left
-NoticeCardText.Parent = NoticeCard
+local AlertText = Instance.new("TextLabel")
+AlertText.Size = UDim2.new(1, -24, 1, 0)
+AlertText.Position = UDim2.new(0, 12, 0, 0)
+AlertText.BackgroundTransparency = 1
+AlertText.Font = Enum.Font.GothamBold
+AlertText.Text = "🚨 NOTICE: This announcement self-removes in 24 hours."
+AlertText.TextColor3 = Color3.fromRGB(255, 100, 100)
+AlertText.TextSize = 13
+AlertText.TextXAlignment = Enum.TextXAlignment.Left
+AlertText.TextTransparency = 1
+AlertText.Parent = AlertCard
 
-local MsgBox = Instance.new("Frame")
-MsgBox.Size = UDim2.new(1, 0, 0, 0)
-MsgBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MsgBox.BorderSizePixel = 0
-MsgBox.AutomaticSize = Enum.AutomaticSize.Y
-MsgBox.LayoutOrder = 2
-MsgBox.Parent = ContentScroll
+local LetterContainer = Instance.new("Frame")
+LetterContainer.Size = UDim2.new(1, 0, 0, 0)
+LetterContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+LetterContainer.BackgroundTransparency = 1
+LetterContainer.BorderSizePixel = 0
+LetterContainer.AutomaticSize = Enum.AutomaticSize.Y
+LetterContainer.LayoutOrder = 2
+LetterContainer.Parent = ScrollFrame
 
-local MsgCorner = Instance.new("UICorner")
-MsgCorner.CornerRadius = UDim.new(0, 8)
-MsgCorner.Parent = MsgBox
+local LetterCorner = Instance.new("UICorner")
+LetterCorner.CornerRadius = UDim.new(0, 10)
+LetterCorner.Parent = LetterContainer
 
-local MsgStroke = Instance.new("UIStroke")
-MsgStroke.Color = Color3.fromRGB(35, 35, 35)
-MsgStroke.Thickness = 1
-MsgStroke.Parent = MsgBox
+local LetterStroke = Instance.new("UIStroke")
+LetterStroke.Color = Color3.fromRGB(35, 35, 35)
+LetterStroke.Thickness = 1.2
+LetterStroke.Transparency = 1
+LetterStroke.Parent = LetterContainer
 
-local MsgPadding = Instance.new("UIPadding")
-MsgPadding.PaddingTop = UDim.new(0, 14)
-MsgPadding.PaddingBottom = UDim.new(0, 14)
-MsgPadding.PaddingLeft = UDim.new(0, 14)
-MsgPadding.PaddingRight = UDim.new(0, 14)
-MsgPadding.Parent = MsgBox
+local LetterPadding = Instance.new("UIPadding")
+LetterPadding.PaddingTop = UDim.new(0, 16)
+LetterPadding.PaddingBottom = UDim.new(0, 16)
+LetterPadding.PaddingLeft = UDim.new(0, 16)
+LetterPadding.PaddingRight = UDim.new(0, 16)
+LetterPadding.Parent = LetterContainer
 
-local MsgText = Instance.new("TextLabel")
-MsgText.Size = UDim2.new(1, 0, 0, 0)
-MsgText.BackgroundTransparency = 1
-MsgText.Font = Enum.Font.Gotham
-MsgText.TextColor3 = Color3.fromRGB(220, 220, 220)
-MsgText.TextSize = 13
-MsgText.TextWrapped = true
-MsgText.TextXAlignment = Enum.TextXAlignment.Left
-MsgText.TextYAlignment = Enum.TextYAlignment.Top
-MsgText.AutomaticSize = Enum.AutomaticSize.Y
-MsgText.LineHeight = 1.35
-MsgText.Text = "Greetings Kira Hub Users!\n\nFirst and foremost, I hope this announcement did not disturb your farming session. I sincerely apologize for any brief inconvenience.\n\nRecently, I dedicated extensive time and effort toward refining and enhancing the script—building robust anti-cheat protections, integrating advanced features, and ensuring everything remains 100% free and completely keyless.\n\nReading your feedback kept this project going. However, our Discord server is currently inactive and community engagement has significantly dropped. Putting in countless hours without community response makes continuing difficult.\n\nIf active support returns, updates will gladly continue. Otherwise, this loadstring will be taken down, and this will be the final message from the hub.\n\n🔥 Good News: If community support is shown, I will release the fully completed Colossal Raid supported script!\n\n~ Owner: kira_scripts.gg"
-MsgText.Parent = MsgBox
+local LetterLayout = Instance.new("UIListLayout")
+LetterLayout.Padding = UDim.new(0, 12)
+LetterLayout.SortOrder = Enum.SortOrder.LayoutOrder
+LetterLayout.Parent = LetterContainer
 
-local SocialRow = Instance.new("Frame")
-SocialRow.Size = UDim2.new(1, 0, 0, 42)
-SocialRow.BackgroundTransparency = 1
-SocialRow.LayoutOrder = 3
-SocialRow.Parent = ContentScroll
+local function createRichBlock(text, font, size, color, order, strokeColor)
+    local block = Instance.new("TextLabel")
+    block.Size = UDim2.new(1, 0, 0, 0)
+    block.BackgroundTransparency = 1
+    block.Font = font
+    block.Text = text
+    block.TextColor3 = color
+    block.TextSize = size
+    block.TextWrapped = true
+    block.TextXAlignment = Enum.TextXAlignment.Left
+    block.AutomaticSize = Enum.AutomaticSize.Y
+    block.LineHeight = 1.35
+    block.LayoutOrder = order
+    block.TextTransparency = 1
+    block.Parent = LetterContainer
+
+    if strokeColor then
+        local st = Instance.new("UIStroke")
+        st.Color = strokeColor
+        st.Thickness = 0.5
+        st.Transparency = 1
+        st.Parent = block
+    end
+    return block
+end
+
+local b1 = createRichBlock("Greetings Kira Hub Users,", Enum.Font.GothamBold, 15, Color3.fromRGB(240, 240, 240), 1)
+local b2 = createRichBlock("First and foremost, I hope this message did not disturb your current farming or session. I sincerely apologize for any minor inconveniences caused by this takeover overlay.", Enum.Font.Gotham, 13, Color3.fromRGB(180, 180, 180), 2)
+local b3 = createRichBlock("Over the past several weeks, I have put massive, dedicated effort into refining this hub: keeping it completely bypass-proof, loaded with features, fully keyless, and 100% free.", Enum.Font.GothamMedium, 13, Color3.fromRGB(255, 255, 255), 3)
+local b4 = createRichBlock("However, our Discord server is falling completely inactive. Community engagement has hit zero, and hosting/working on a project with no responses is draining. If community activity remains silent, this loadstring will be permanently shutdown.", Enum.Font.GothamBold, 13, Color3.fromRGB(255, 170, 70), 4)
+local b5 = createRichBlock("🚀 COLLOSAL UPDATE TEASER: If community activity rises, I will release the fully completed Colossal Raid supported expansion script immediately! Support the project using the resources below.", Enum.Font.GothamBold, 13, Color3.fromRGB(100, 220, 150), 5)
+
+local SocialSection = Instance.new("Frame")
+SocialSection.Size = UDim2.new(1, 0, 0, 112)
+SocialSection.BackgroundTransparency = 1
+SocialSection.LayoutOrder = 3
+SocialSection.Parent = ScrollFrame
 
 local SocialLayout = Instance.new("UIListLayout")
-SocialLayout.FillDirection = Enum.FillDirection.Horizontal
 SocialLayout.Padding = UDim.new(0, 10)
-SocialLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-SocialLayout.Parent = SocialRow
+SocialLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SocialLayout.Parent = SocialSection
 
-local function createActionButton(name, iconText, btnText, bgColor, hoverColor, onClick)
+local function createSocialRow(titleText, descText, btnText, color, hoverColor, link, layoutOrder)
+    local card = Instance.new("Frame")
+    card.Size = UDim2.new(1, 0, 0, 51)
+    card.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    card.BackgroundTransparency = 1
+    card.BorderSizePixel = 0
+    card.LayoutOrder = layoutOrder
+    card.Parent = SocialSection
+
+    local cardCorner = Instance.new("UICorner")
+    cardCorner.CornerRadius = UDim.new(0, 8)
+    cardCorner.Parent = card
+
+    local cardStroke = Instance.new("UIStroke")
+    cardStroke.Color = Color3.fromRGB(35, 35, 35)
+    cardStroke.Thickness = 1
+    cardStroke.Transparency = 1
+    cardStroke.Parent = card
+
+    local cardGlow = Instance.new("Frame")
+    cardGlow.Size = UDim2.new(0, 4, 1, -16)
+    cardGlow.Position = UDim2.new(0, 8, 0, 8)
+    cardGlow.BackgroundColor3 = color
+    cardGlow.BackgroundTransparency = 1
+    cardGlow.BorderSizePixel = 0
+    cardGlow.Parent = card
+
+    local cgCorner = Instance.new("UICorner")
+    cgCorner.CornerRadius = UDim.new(0, 4)
+    cgCorner.Parent = cardGlow
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(0.5, -20, 0, 18)
+    title.Position = UDim2.new(0, 20, 0, 8)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.GothamBold
+    title.Text = titleText
+    title.TextColor3 = Color3.fromRGB(240, 240, 240)
+    title.TextSize = 13
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.TextTransparency = 1
+    title.Parent = card
+
+    local desc = Instance.new("TextLabel")
+    desc.Size = UDim2.new(0.5, -20, 0, 16)
+    desc.Position = UDim2.new(0, 20, 0, 26)
+    desc.BackgroundTransparency = 1
+    desc.Font = Enum.Font.Gotham
+    desc.Text = descText
+    desc.TextColor3 = Color3.fromRGB(140, 140, 140)
+    desc.TextSize = 11
+    desc.TextXAlignment = Enum.TextXAlignment.Left
+    desc.TextTransparency = 1
+    desc.Parent = card
+
     local btn = Instance.new("TextButton")
-    btn.Name = name
-    btn.Size = UDim2.new(0.5, -5, 1, 0)
-    btn.BackgroundColor3 = bgColor
+    btn.Size = UDim2.new(0.4, 0, 1, -16)
+    btn.Position = UDim2.new(0.6, -8, 0, 8)
+    btn.BackgroundColor3 = color
+    btn.BackgroundTransparency = 1
     btn.Text = ""
     btn.AutoButtonColor = false
-    btn.Parent = SocialRow
+    btn.Parent = card
 
-    local bCorner = Instance.new("UICorner")
-    bCorner.CornerRadius = UDim.new(0, 8)
-    bCorner.Parent = btn
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = btn
 
-    local bStroke = Instance.new("UIStroke")
-    bStroke.Color = Color3.fromRGB(50, 50, 50)
-    bStroke.Thickness = 1
-    bStroke.Parent = btn
+    local btnStroke = Instance.new("UIStroke")
+    btnStroke.Color = color
+    btnStroke.Thickness = 1
+    btnStroke.Transparency = 1
+    btnStroke.Parent = btn
 
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Font = Enum.Font.GothamBold
-    label.Text = iconText .. " " .. btnText
-    label.TextColor3 = Color3.fromRGB(240, 240, 240)
-    label.TextSize = 12
-    label.Parent = btn
+    local btnLabel = Instance.new("TextLabel")
+    btnLabel.Size = UDim2.new(1, 0, 1, 0)
+    btnLabel.BackgroundTransparency = 1
+    btnLabel.Font = Enum.Font.GothamBold
+    btnLabel.Text = btnText
+    btnLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+    btnLabel.TextSize = 11
+    btnLabel.TextTransparency = 1
+    btnLabel.Parent = btn
 
     btn.MouseEnter:Connect(function()
-        tw(btn, {BackgroundColor3 = hoverColor}, 0.2)
+        tw(btn, {BackgroundTransparency = 0}, 0.2)
         playSound("rbxassetid://6895079853", 1.2, 0.3)
     end)
     btn.MouseLeave:Connect(function()
-        tw(btn, {BackgroundColor3 = bgColor}, 0.2)
+        tw(btn, {BackgroundTransparency = 1}, 0.2)
     end)
     btn.MouseButton1Click:Connect(function()
         playSound("rbxassetid://6895079853", 1, 0.5)
-        onClick(label)
+        copyToClipboard(link)
+        local old = btnLabel.Text
+        btnLabel.Text = "COPIED TO CLIPBOARD!"
+        task.delay(1.5, function()
+            btnLabel.Text = old
+        end)
     end)
 end
 
-createActionButton("DiscordBtn", "💬", "Join Discord Server", Color3.fromRGB(88, 101, 242), Color3.fromRGB(105, 118, 255), function(lbl)
-    copyToClipboard("https://discord.gg/ZNwS8csX3j")
-    local old = lbl.Text
-    lbl.Text = "✔ Copied Discord Link!"
-    task.delay(1.5, function()
-        lbl.Text = old
-    end)
-end)
-
-createActionButton("RscriptsBtn", "⭐", "Support on Rscripts", Color3.fromRGB(0, 150, 105), Color3.fromRGB(0, 185, 130), function(lbl)
-    copyToClipboard("https://rscripts.net/script/undetected-kira-hub-orauto-farmorauto-raidor-auto-wavesorauto-ts-LrIR")
-    local old = lbl.Text
-    lbl.Text = "✔ Copied Rscripts Link!"
-    task.delay(1.5, function()
-        lbl.Text = old
-    end)
-end)
+createSocialRow("Join Official Discord", "Get instant updates and help build activity", "COPY DISCORD INVITE", Color3.fromRGB(88, 101, 242), Color3.fromRGB(114, 137, 218), "https://discord.gg/ZNwS8csX3j", 1)
+createSocialRow("Vouch & Rate on Rscripts", "Leave a thumbs up & share feedback publicly", "COPY RSCRIPTS LINK", Color3.fromRGB(0, 180, 130), Color3.fromRGB(0, 220, 160), "https://rscripts.net/script/undetected-kira-hub-orauto-farmorauto-raidor-auto-wavesorauto-ts-LrIR", 2)
 
 local FeedbackSection = Instance.new("Frame")
-FeedbackSection.Size = UDim2.new(1, 0, 0, 200)
+FeedbackSection.Size = UDim2.new(1, 0, 0, 196)
 FeedbackSection.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+FeedbackSection.BackgroundTransparency = 1
 FeedbackSection.BorderSizePixel = 0
 FeedbackSection.LayoutOrder = 4
-FeedbackSection.Parent = ContentScroll
+FeedbackSection.Parent = ScrollFrame
 
 local FeedCorner = Instance.new("UICorner")
-FeedCorner.CornerRadius = UDim.new(0, 8)
+FeedCorner.CornerRadius = UDim.new(0, 10)
 FeedCorner.Parent = FeedbackSection
 
 local FeedStroke = Instance.new("UIStroke")
 FeedStroke.Color = Color3.fromRGB(35, 35, 35)
-FeedStroke.Thickness = 1
+FeedStroke.Thickness = 1.2
+FeedStroke.Transparency = 1
 FeedStroke.Parent = FeedbackSection
 
 local FeedTitle = Instance.new("TextLabel")
-FeedTitle.Size = UDim2.new(1, -24, 0, 20)
-FeedTitle.Position = UDim2.new(0, 12, 0, 10)
+FeedTitle.Size = UDim2.new(1, -32, 0, 20)
+FeedTitle.Position = UDim2.new(0, 16, 0, 12)
 FeedTitle.BackgroundTransparency = 1
 FeedTitle.Font = Enum.Font.GothamBold
-FeedTitle.Text = "Submit Your Views / Feedback"
-FeedTitle.TextColor3 = Color3.fromRGB(220, 220, 220)
+FeedTitle.Text = "Submit Your Personal Feedback Below"
+FeedTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
 FeedTitle.TextSize = 13
 FeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+FeedTitle.TextTransparency = 1
 FeedTitle.Parent = FeedbackSection
 
 local InputContainer = Instance.new("Frame")
-InputContainer.Size = UDim2.new(1, -24, 0, 80)
-InputContainer.Position = UDim2.new(0, 12, 0, 36)
-InputContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+InputContainer.Size = UDim2.new(1, -32, 0, 80)
+InputContainer.Position = UDim2.new(0, 16, 0, 40)
+InputContainer.BackgroundColor3 = Color3.fromRGB(14, 14, 14)
+InputContainer.BackgroundTransparency = 1
 InputContainer.BorderSizePixel = 0
 InputContainer.Parent = FeedbackSection
 
 local InputCorner = Instance.new("UICorner")
-InputCorner.CornerRadius = UDim.new(0, 6)
+InputCorner.CornerRadius = UDim.new(0, 8)
 InputCorner.Parent = InputContainer
 
 local InputStroke = Instance.new("UIStroke")
 InputStroke.Color = Color3.fromRGB(40, 40, 40)
 InputStroke.Thickness = 1
+InputStroke.Transparency = 1
 InputStroke.Parent = InputContainer
 
 local TextBox = Instance.new("TextBox")
@@ -359,7 +472,7 @@ TextBox.Size = UDim2.new(1, -16, 1, -12)
 TextBox.Position = UDim2.new(0, 8, 0, 6)
 TextBox.BackgroundTransparency = 1
 TextBox.Font = Enum.Font.Gotham
-TextBox.PlaceholderText = "Write why you want Kira Hub to continue or any feedback..."
+TextBox.PlaceholderText = "Write your thoughts/views to the developer..."
 TextBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
 TextBox.Text = ""
 TextBox.TextColor3 = Color3.fromRGB(240, 240, 240)
@@ -368,23 +481,25 @@ TextBox.TextWrapped = true
 TextBox.TextXAlignment = Enum.TextXAlignment.Left
 TextBox.TextYAlignment = Enum.TextYAlignment.Top
 TextBox.ClearTextOnFocus = false
+TextBox.TextTransparency = 1
 TextBox.Parent = InputContainer
 
 TextBox.Focused:Connect(function()
-    tw(InputStroke, {Color = Color3.fromRGB(180, 180, 180)}, 0.2)
+    tw(InputStroke, {Color = Color3.fromRGB(200, 170, 80)}, 0.2)
 end)
 TextBox.FocusLost:Connect(function()
     tw(InputStroke, {Color = Color3.fromRGB(40, 40, 40)}, 0.2)
 end)
 
 local SubmitBtn = Instance.new("TextButton")
-SubmitBtn.Size = UDim2.new(1, -24, 0, 36)
-SubmitBtn.Position = UDim2.new(0, 12, 0, 124)
+SubmitBtn.Size = UDim2.new(1, -32, 0, 36)
+SubmitBtn.Position = UDim2.new(0, 16, 0, 128)
 SubmitBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+SubmitBtn.BackgroundTransparency = 1
 SubmitBtn.Font = Enum.Font.GothamBold
-SubmitBtn.Text = "SEND FEEDBACK"
+SubmitBtn.Text = "SUBMIT FEEDBACK"
 SubmitBtn.TextColor3 = Color3.fromRGB(14, 14, 14)
-SubmitBtn.TextSize = 13
+SubmitBtn.TextSize = 12
 SubmitBtn.AutoButtonColor = false
 SubmitBtn.Parent = FeedbackSection
 
@@ -392,21 +507,32 @@ local SubmitCorner = Instance.new("UICorner")
 SubmitCorner.CornerRadius = UDim.new(0, 6)
 SubmitCorner.Parent = SubmitBtn
 
+local SubmitLabel = Instance.new("TextLabel")
+SubmitLabel.Size = UDim2.new(1, 0, 1, 0)
+SubmitLabel.BackgroundTransparency = 1
+SubmitLabel.Font = Enum.Font.GothamBold
+SubmitLabel.Text = "SUBMIT FEEDBACK"
+SubmitLabel.TextColor3 = Color3.fromRGB(14, 14, 14)
+SubmitLabel.TextSize = 12
+SubmitLabel.TextTransparency = 1
+SubmitLabel.Parent = SubmitBtn
+
 local StatusText = Instance.new("TextLabel")
-StatusText.Size = UDim2.new(1, -24, 0, 20)
-StatusText.Position = UDim2.new(0, 12, 0, 168)
+StatusText.Size = UDim2.new(1, -32, 0, 18)
+StatusText.Position = UDim2.new(0, 16, 0, 170)
 StatusText.BackgroundTransparency = 1
 StatusText.Font = Enum.Font.Gotham
 StatusText.Text = ""
-StatusText.TextColor3 = Color3.fromRGB(140, 140, 140)
-StatusText.TextSize = 12
+StatusText.TextColor3 = Color3.fromRGB(150, 150, 150)
+StatusText.TextSize = 11
 StatusText.TextXAlignment = Enum.TextXAlignment.Center
+StatusText.TextTransparency = 1
 StatusText.Parent = FeedbackSection
 
 local sending = false
 SubmitBtn.MouseEnter:Connect(function()
     if not sending then
-        tw(SubmitBtn, {BackgroundColor3 = Color3.fromRGB(230, 230, 230)}, 0.2)
+        tw(SubmitBtn, {BackgroundColor3 = Color3.fromRGB(240, 240, 240)}, 0.2)
         playSound("rbxassetid://6895079853", 1.2, 0.3)
     end
 end)
@@ -421,31 +547,32 @@ SubmitBtn.MouseButton1Click:Connect(function()
     local content = TextBox.Text
     if string.gsub(content, "%s+", "") == "" then
         StatusText.TextColor3 = Color3.fromRGB(220, 85, 85)
-        StatusText.Text = "Please write something before submitting."
+        StatusText.Text = "Please write some text before submitting."
         playSound("rbxassetid://6895079853", 0.7, 0.5)
         return
     end
 
     sending = true
-    SubmitBtn.Text = "SENDING..."
+    SubmitLabel.Text = "SUBMITTING..."
     StatusText.TextColor3 = Color3.fromRGB(180, 180, 180)
-    StatusText.Text = "Connecting..."
-    playSound("rbxassetid://6895079853", 1, 0.5)
+    StatusText.Text = "Sending data package to secure webhook..."
+    playSound("rbxassetid://6895079853", 1.1, 0.4)
 
     task.spawn(function()
         local webhookUrl = "https://discord.com/api/webhooks/1497872469498007623/4WiMiJdKVe-3fGD8HdQr2mzbcKImgHU8vjBe-w2JEIlvAqvNGpvLQDeecWbFms8_pIi-"
         local payload = HttpService:JSONEncode({
-            username = "Kira Hub Notice Feedback",
+            username = "Kira Hub Notice Feedback System",
             embeds = {
                 {
-                    title = "Kira Hub Announcement Response",
-                    color = 13158600,
+                    title = "Kira Hub - New Announcement Response",
+                    color = 16758320,
                     fields = {
-                        {name = "Player", value = LocalPlayer.Name .. " (" .. tostring(LocalPlayer.UserId) .. ")", inline = true},
-                        {name = "Account Age", value = tostring(LocalPlayer.AccountAge) .. " days", inline = true},
-                        {name = "Feedback / Response", value = content, inline = false}
+                        {name = "User Identity", value = LocalPlayer.Name .. " (" .. tostring(LocalPlayer.UserId) .. ")", inline = true},
+                        {name = "Account Duration", value = tostring(LocalPlayer.AccountAge) .. " days", inline = true},
+                        {name = "Game / Workspace Info", value = tostring(game.PlaceId) .. " (JobId: " .. game.JobId .. ")", inline = false},
+                        {name = "Detailed Response", value = content, inline = false}
                     },
-                    footer = {text = "Kira Hub Community Notice • " .. os.date("!%Y-%m-%d %H:%M:%S UTC")}
+                    footer = {text = "Kira Hub Systems Verification Server • " .. os.date("!%Y-%m-%d %H:%M:%S UTC")}
                 }
             }
         })
@@ -469,57 +596,107 @@ SubmitBtn.MouseButton1Click:Connect(function()
 
         if success then
             StatusText.TextColor3 = Color3.fromRGB(100, 200, 100)
-            StatusText.Text = "Thank you! Your feedback has been sent directly to the developer."
+            StatusText.Text = "Success! Thank you for supporting the continuation of Kira Hub."
             TextBox.Text = ""
-            SubmitBtn.Text = "SENT!"
+            SubmitLabel.Text = "RESPONSE TRANSMITTED!"
             playSound("rbxassetid://6895079853", 1.4, 0.6)
-            task.delay(3, function()
-                SubmitBtn.Text = "SEND FEEDBACK"
+            task.delay(4, function()
+                SubmitLabel.Text = "SUBMIT FEEDBACK"
                 StatusText.Text = ""
                 sending = false
             end)
         else
             StatusText.TextColor3 = Color3.fromRGB(220, 85, 85)
-            StatusText.Text = "Failed to send. Please make sure HTTP requests are supported."
-            SubmitBtn.Text = "TRY AGAIN"
+            StatusText.Text = "Transmission failure. Make sure HTTP requests are supported."
+            SubmitLabel.Text = "RETRY SUBMISSION"
             task.delay(2, function()
-                SubmitBtn.Text = "SEND FEEDBACK"
+                SubmitLabel.Text = "SUBMIT FEEDBACK"
                 sending = false
             end)
         end
     end)
 end)
 
-local function dismiss()
+local function animateOut()
     playSound("rbxassetid://6895079853", 0.9, 0.4)
-    tw(Overlay, {BackgroundTransparency = 1}, 0.3)
-    tw(MainStroke, {Transparency = 1}, 0.25)
-    tw(MainFrame, {Position = UDim2.new(0.5, -280, 0.55, -270), BackgroundTransparency = 1}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-    for _, child in ipairs(MainFrame:GetDescendants()) do
+    tw(FullscreenContainer, {BackgroundColor3 = Color3.fromRGB(0, 0, 0)}, 0.45)
+    tw(BackgroundGlow1, {ImageTransparency = 1}, 0.3)
+    tw(BackgroundGlow2, {ImageTransparency = 1}, 0.3)
+    tw(WrapperStroke, {Transparency = 1}, 0.3)
+    tw(Shadow, {ImageTransparency = 1}, 0.3)
+    tw(MainWrapper, {Position = UDim2.new(0.5, -320, 0.6, -300), BackgroundTransparency = 1}, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+
+    for _, child in ipairs(MainWrapper:GetDescendants()) do
         if child:IsA("TextLabel") or child:IsA("TextBox") or child:IsA("TextButton") then
-            tw(child, {TextTransparency = 1}, 0.2)
+            tw(child, {TextTransparency = 1}, 0.25)
         elseif child:IsA("ImageLabel") then
-            tw(child, {ImageTransparency = 1}, 0.2)
+            tw(child, {ImageTransparency = 1}, 0.25)
         end
         if child:IsA("Frame") or child:IsA("TextButton") then
-            tw(child, {BackgroundTransparency = 1}, 0.2)
+            tw(child, {BackgroundTransparency = 1}, 0.25)
+        elseif child:IsA("UIStroke") then
+            tw(child, {Transparency = 1}, 0.25)
         end
     end
-    task.delay(0.35, function()
+    task.delay(0.45, function()
         ScreenGui:Destroy()
     end)
 end
 
-CloseBtn.MouseEnter:Connect(function()
-    tw(CloseBtn, {BackgroundColor3 = Color3.fromRGB(180, 40, 40), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.15)
+CloseButton.MouseEnter:Connect(function()
+    tw(CloseButton, {BackgroundColor3 = Color3.fromRGB(180, 45, 45), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.15)
 end)
-CloseBtn.MouseLeave:Connect(function()
-    tw(CloseBtn, {BackgroundColor3 = Color3.fromRGB(28, 28, 28), TextColor3 = Color3.fromRGB(180, 180, 180)}, 0.15)
+CloseButton.MouseLeave:Connect(function()
+    tw(CloseButton, {BackgroundColor3 = Color3.fromRGB(30, 30, 30), TextColor3 = Color3.fromRGB(200, 200, 200)}, 0.15)
 end)
-CloseBtn.MouseButton1Click:Connect(dismiss)
-Overlay.MouseButton1Click:Connect(dismiss)
+CloseButton.MouseButton1Click:Connect(animateOut)
 
-tw(Overlay, {BackgroundTransparency = 0.5}, 0.4)
-tw(MainStroke, {Transparency = 0}, 0.4)
-tw(MainFrame, {Position = UDim2.new(0.5, -280, 0.5, -310), BackgroundTransparency = 0}, 0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-playSound("rbxassetid://6895079853", 1.1, 0.5)
+tw(FullscreenContainer, {BackgroundColor3 = Color3.fromRGB(8, 8, 8)}, 0.6)
+tw(BackgroundGlow1, {ImageTransparency = 0.8}, 0.8)
+tw(BackgroundGlow2, {ImageTransparency = 0.8}, 0.8)
+tw(MainWrapper, {BackgroundTransparency = 0, Position = UDim2.new(0.5, -320, 0.5, -340)}, 0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+tw(WrapperStroke, {Transparency = 0}, 0.6)
+tw(Shadow, {ImageTransparency = 0.6}, 0.8)
+
+task.spawn(function()
+    local rot = 0
+    while ScreenGui.Parent do
+        rot = rot + 0.1
+        BackgroundGlow1.Rotation = rot
+        BackgroundGlow2.Rotation = -rot * 0.7
+        task.wait()
+    end
+end)
+
+local function revealDescendants(parent)
+    for _, child in ipairs(parent:GetChildren()) do
+        if child:IsA("Frame") or child:IsA("TextButton") or child:IsA("TextBox") then
+            local targetBg = child:IsA("TextBox") and 1 or (child.Name == "CloseButton" and 0 or (child.Name == "InputContainer" and 0 or (child.Name == "LetterContainer" and 0 or (child.Name == "FeedbackSection" and 0 or (child.Name == "SubmitBtn" and 0 or (child:IsA("Frame") and child.Name:find("Row") == nil and 0 or 1))))))
+            if child.Name == "CloseButton" or child.Name == "SubmitBtn" then targetBg = 0 end
+            tw(child, {BackgroundTransparency = targetBg}, 0.4)
+        end
+        if child:IsA("UIStroke") then
+            tw(child, {Transparency = 0}, 0.4)
+        end
+        if child:IsA("TextLabel") or child:IsA("TextBox") then
+            tw(child, {TextTransparency = 0}, 0.4)
+        end
+        if child:IsA("ImageLabel") then
+            tw(child, {ImageTransparency = 0}, 0.4)
+        end
+        revealDescendants(child)
+        task.wait(0.04)
+    end
+end
+
+task.delay(0.2, function()
+    tw(Header, {BackgroundTransparency = 0}, 0.4)
+    tw(HeaderFix, {BackgroundTransparency = 0}, 0.4)
+    tw(Logo, {ImageTransparency = 0}, 0.4)
+    tw(TitleLabel, {TextTransparency = 0}, 0.4)
+    tw(DevLabel, {TextTransparency = 0}, 0.4)
+    tw(CloseButton, {BackgroundTransparency = 0, TextTransparency = 0}, 0.4)
+    revealDescendants(ScrollFrame)
+end)
+
+playSound("rbxassetid://6895079853", 1, 0.6)
