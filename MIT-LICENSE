@@ -1,1 +1,525 @@
-NO - PREVIEW AVAILABLE
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local HttpService = game:GetService("HttpService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local function getRootGui()
+    if gethui then
+        return gethui()
+    elseif syn and syn.protect_gui then
+        local g = Instance.new("Folder")
+        syn.protect_gui(g)
+        g.Parent = game:GetService("CoreGui")
+        return g
+    elseif game:GetService("CoreGui") then
+        return game:GetService("CoreGui")
+    else
+        return LocalPlayer:WaitForChild("PlayerGui")
+    end
+end
+
+local existing = getRootGui():FindFirstChild("KiraAnnouncementUI")
+if existing then
+    existing:Destroy()
+end
+
+local function playSound(soundId, pitch, vol)
+    task.spawn(function()
+        local s = Instance.new("Sound")
+        s.SoundId = soundId
+        s.Volume = vol or 0.6
+        s.Pitch = pitch or 1
+        s.Parent = SoundService
+        s:Play()
+        s.Ended:Connect(function()
+            s:Destroy()
+        end)
+    end)
+end
+
+local function tw(obj, props, dur, style, dir)
+    local t = TweenService:Create(obj, TweenInfo.new(dur or 0.25, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), props)
+    t:Play()
+    return t
+end
+
+local function copyToClipboard(txt)
+    pcall(function()
+        if setclipboard then
+            setclipboard(txt)
+        elseif toclipboard then
+            toclipboard(txt)
+        end
+    end)
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "KiraAnnouncementUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = getRootGui()
+
+local Overlay = Instance.new("TextButton")
+Overlay.Name = "Overlay"
+Overlay.Size = UDim2.new(1, 0, 1, 0)
+Overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Overlay.BackgroundTransparency = 1
+Overlay.Text = ""
+Overlay.AutoButtonColor = false
+Overlay.Parent = ScreenGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 560, 0, 620)
+MainFrame.Position = UDim2.new(0.5, -280, 0.5, -270)
+MainFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 14)
+MainFrame.BackgroundTransparency = 1
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(45, 45, 45)
+MainStroke.Thickness = 1.2
+MainStroke.Transparency = 1
+MainStroke.Parent = MainFrame
+
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 60)
+Header.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Header.BorderSizePixel = 0
+Header.Parent = MainFrame
+
+local HeaderStroke = Instance.new("UIStroke")
+HeaderStroke.Color = Color3.fromRGB(35, 35, 35)
+HeaderStroke.Thickness = 1
+HeaderStroke.Parent = Header
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.Parent = Header
+
+local HeaderFix = Instance.new("Frame")
+HeaderFix.Size = UDim2.new(1, 0, 0, 12)
+HeaderFix.Position = UDim2.new(0, 0, 1, -12)
+HeaderFix.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+HeaderFix.BorderSizePixel = 0
+HeaderFix.Parent = Header
+
+local Logo = Instance.new("ImageLabel")
+Logo.Size = UDim2.new(0, 36, 0, 36)
+Logo.Position = UDim2.new(0, 16, 0.5, -18)
+Logo.BackgroundTransparency = 1
+Logo.Image = "rbxassetid://115346308182122"
+Logo.Parent = Header
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0, 340, 0, 22)
+Title.Position = UDim2.new(0, 60, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Kira Hub | Important Notice"
+Title.TextColor3 = Color3.fromRGB(240, 240, 240)
+Title.TextSize = 16
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Header
+
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Size = UDim2.new(0, 340, 0, 16)
+Subtitle.Position = UDim2.new(0, 60, 0, 32)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Font = Enum.Font.Gotham
+Subtitle.Text = "~ by kira_scripts.gg • Community Announcement"
+Subtitle.TextColor3 = Color3.fromRGB(140, 140, 140)
+Subtitle.TextSize = 12
+Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+Subtitle.Parent = Header
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 32, 0, 32)
+CloseBtn.Position = UDim2.new(1, -44, 0.5, -16)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+CloseBtn.TextSize = 14
+CloseBtn.AutoButtonColor = false
+CloseBtn.Parent = Header
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
+
+local ContentScroll = Instance.new("ScrollingFrame")
+ContentScroll.Size = UDim2.new(1, -32, 1, -76)
+ContentScroll.Position = UDim2.new(0, 16, 0, 68)
+ContentScroll.BackgroundTransparency = 1
+ContentScroll.BorderSizePixel = 0
+ContentScroll.ScrollBarThickness = 4
+ContentScroll.ScrollBarImageColor3 = Color3.fromRGB(70, 70, 70)
+ContentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+ContentScroll.Parent = MainFrame
+
+local ContentLayout = Instance.new("UIListLayout")
+ContentLayout.Padding = UDim.new(0, 12)
+ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ContentLayout.Parent = ContentScroll
+
+local function updateScroll()
+    ContentScroll.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
+end
+ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateScroll)
+
+local NoticeCard = Instance.new("Frame")
+NoticeCard.Size = UDim2.new(1, 0, 0, 38)
+NoticeCard.BackgroundColor3 = Color3.fromRGB(28, 22, 12)
+NoticeCard.BorderSizePixel = 0
+NoticeCard.LayoutOrder = 1
+NoticeCard.Parent = ContentScroll
+
+local NoticeCardCorner = Instance.new("UICorner")
+NoticeCardCorner.CornerRadius = UDim.new(0, 8)
+NoticeCardCorner.Parent = NoticeCard
+
+local NoticeCardStroke = Instance.new("UIStroke")
+NoticeCardStroke.Color = Color3.fromRGB(160, 110, 30)
+NoticeCardStroke.Thickness = 1
+NoticeCardStroke.Parent = NoticeCard
+
+local NoticeCardText = Instance.new("TextLabel")
+NoticeCardText.Size = UDim2.new(1, -20, 1, 0)
+NoticeCardText.Position = UDim2.new(0, 10, 0, 0)
+NoticeCardText.BackgroundTransparency = 1
+NoticeCardText.Font = Enum.Font.GothamMedium
+NoticeCardText.Text = "⏳ This announcement will be removed after 24 hours."
+NoticeCardText.TextColor3 = Color3.fromRGB(255, 200, 90)
+NoticeCardText.TextSize = 13
+NoticeCardText.TextXAlignment = Enum.TextXAlignment.Left
+NoticeCardText.Parent = NoticeCard
+
+local MsgBox = Instance.new("Frame")
+MsgBox.Size = UDim2.new(1, 0, 0, 0)
+MsgBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MsgBox.BorderSizePixel = 0
+MsgBox.AutomaticSize = Enum.AutomaticSize.Y
+MsgBox.LayoutOrder = 2
+MsgBox.Parent = ContentScroll
+
+local MsgCorner = Instance.new("UICorner")
+MsgCorner.CornerRadius = UDim.new(0, 8)
+MsgCorner.Parent = MsgBox
+
+local MsgStroke = Instance.new("UIStroke")
+MsgStroke.Color = Color3.fromRGB(35, 35, 35)
+MsgStroke.Thickness = 1
+MsgStroke.Parent = MsgBox
+
+local MsgPadding = Instance.new("UIPadding")
+MsgPadding.PaddingTop = UDim.new(0, 14)
+MsgPadding.PaddingBottom = UDim.new(0, 14)
+MsgPadding.PaddingLeft = UDim.new(0, 14)
+MsgPadding.PaddingRight = UDim.new(0, 14)
+MsgPadding.Parent = MsgBox
+
+local MsgText = Instance.new("TextLabel")
+MsgText.Size = UDim2.new(1, 0, 0, 0)
+MsgText.BackgroundTransparency = 1
+MsgText.Font = Enum.Font.Gotham
+MsgText.TextColor3 = Color3.fromRGB(220, 220, 220)
+MsgText.TextSize = 13
+MsgText.TextWrapped = true
+MsgText.TextXAlignment = Enum.TextXAlignment.Left
+MsgText.TextYAlignment = Enum.TextYAlignment.Top
+MsgText.AutomaticSize = Enum.AutomaticSize.Y
+MsgText.LineHeight = 1.35
+MsgText.Text = "Greetings Kira Hub Users!\n\nFirst and foremost, I hope this announcement did not disturb your farming session. I sincerely apologize for any brief inconvenience.\n\nRecently, I dedicated extensive time and effort toward refining and enhancing the script—building robust anti-cheat protections, integrating advanced features, and ensuring everything remains 100% free and completely keyless.\n\nReading your feedback kept this project going. However, our Discord server is currently inactive and community engagement has significantly dropped. Putting in countless hours without community response makes continuing difficult.\n\nIf active support returns, updates will gladly continue. Otherwise, this loadstring will be taken down, and this will be the final message from the hub.\n\n🔥 Good News: If community support is shown, I will release the fully completed Colossal Raid supported script!\n\n~ Owner: kira_scripts.gg"
+MsgText.Parent = MsgBox
+
+local SocialRow = Instance.new("Frame")
+SocialRow.Size = UDim2.new(1, 0, 0, 42)
+SocialRow.BackgroundTransparency = 1
+SocialRow.LayoutOrder = 3
+SocialRow.Parent = ContentScroll
+
+local SocialLayout = Instance.new("UIListLayout")
+SocialLayout.FillDirection = Enum.FillDirection.Horizontal
+SocialLayout.Padding = UDim.new(0, 10)
+SocialLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+SocialLayout.Parent = SocialRow
+
+local function createActionButton(name, iconText, btnText, bgColor, hoverColor, onClick)
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Size = UDim2.new(0.5, -5, 1, 0)
+    btn.BackgroundColor3 = bgColor
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.Parent = SocialRow
+
+    local bCorner = Instance.new("UICorner")
+    bCorner.CornerRadius = UDim.new(0, 8)
+    bCorner.Parent = btn
+
+    local bStroke = Instance.new("UIStroke")
+    bStroke.Color = Color3.fromRGB(50, 50, 50)
+    bStroke.Thickness = 1
+    bStroke.Parent = btn
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamBold
+    label.Text = iconText .. " " .. btnText
+    label.TextColor3 = Color3.fromRGB(240, 240, 240)
+    label.TextSize = 12
+    label.Parent = btn
+
+    btn.MouseEnter:Connect(function()
+        tw(btn, {BackgroundColor3 = hoverColor}, 0.2)
+        playSound("rbxassetid://6895079853", 1.2, 0.3)
+    end)
+    btn.MouseLeave:Connect(function()
+        tw(btn, {BackgroundColor3 = bgColor}, 0.2)
+    end)
+    btn.MouseButton1Click:Connect(function()
+        playSound("rbxassetid://6895079853", 1, 0.5)
+        onClick(label)
+    end)
+end
+
+createActionButton("DiscordBtn", "💬", "Join Discord Server", Color3.fromRGB(88, 101, 242), Color3.fromRGB(105, 118, 255), function(lbl)
+    copyToClipboard("https://discord.gg/ZNwS8csX3j")
+    local old = lbl.Text
+    lbl.Text = "✔ Copied Discord Link!"
+    task.delay(1.5, function()
+        lbl.Text = old
+    end)
+end)
+
+createActionButton("RscriptsBtn", "⭐", "Support on Rscripts", Color3.fromRGB(0, 150, 105), Color3.fromRGB(0, 185, 130), function(lbl)
+    copyToClipboard("https://rscripts.net/script/undetected-kira-hub-orauto-farmorauto-raidor-auto-wavesorauto-ts-LrIR")
+    local old = lbl.Text
+    lbl.Text = "✔ Copied Rscripts Link!"
+    task.delay(1.5, function()
+        lbl.Text = old
+    end)
+end)
+
+local FeedbackSection = Instance.new("Frame")
+FeedbackSection.Size = UDim2.new(1, 0, 0, 200)
+FeedbackSection.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+FeedbackSection.BorderSizePixel = 0
+FeedbackSection.LayoutOrder = 4
+FeedbackSection.Parent = ContentScroll
+
+local FeedCorner = Instance.new("UICorner")
+FeedCorner.CornerRadius = UDim.new(0, 8)
+FeedCorner.Parent = FeedbackSection
+
+local FeedStroke = Instance.new("UIStroke")
+FeedStroke.Color = Color3.fromRGB(35, 35, 35)
+FeedStroke.Thickness = 1
+FeedStroke.Parent = FeedbackSection
+
+local FeedTitle = Instance.new("TextLabel")
+FeedTitle.Size = UDim2.new(1, -24, 0, 20)
+FeedTitle.Position = UDim2.new(0, 12, 0, 10)
+FeedTitle.BackgroundTransparency = 1
+FeedTitle.Font = Enum.Font.GothamBold
+FeedTitle.Text = "Submit Your Views / Feedback"
+FeedTitle.TextColor3 = Color3.fromRGB(220, 220, 220)
+FeedTitle.TextSize = 13
+FeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+FeedTitle.Parent = FeedbackSection
+
+local InputContainer = Instance.new("Frame")
+InputContainer.Size = UDim2.new(1, -24, 0, 80)
+InputContainer.Position = UDim2.new(0, 12, 0, 36)
+InputContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+InputContainer.BorderSizePixel = 0
+InputContainer.Parent = FeedbackSection
+
+local InputCorner = Instance.new("UICorner")
+InputCorner.CornerRadius = UDim.new(0, 6)
+InputCorner.Parent = InputContainer
+
+local InputStroke = Instance.new("UIStroke")
+InputStroke.Color = Color3.fromRGB(40, 40, 40)
+InputStroke.Thickness = 1
+InputStroke.Parent = InputContainer
+
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(1, -16, 1, -12)
+TextBox.Position = UDim2.new(0, 8, 0, 6)
+TextBox.BackgroundTransparency = 1
+TextBox.Font = Enum.Font.Gotham
+TextBox.PlaceholderText = "Write why you want Kira Hub to continue or any feedback..."
+TextBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(240, 240, 240)
+TextBox.TextSize = 12
+TextBox.TextWrapped = true
+TextBox.TextXAlignment = Enum.TextXAlignment.Left
+TextBox.TextYAlignment = Enum.TextYAlignment.Top
+TextBox.ClearTextOnFocus = false
+TextBox.Parent = InputContainer
+
+TextBox.Focused:Connect(function()
+    tw(InputStroke, {Color = Color3.fromRGB(180, 180, 180)}, 0.2)
+end)
+TextBox.FocusLost:Connect(function()
+    tw(InputStroke, {Color = Color3.fromRGB(40, 40, 40)}, 0.2)
+end)
+
+local SubmitBtn = Instance.new("TextButton")
+SubmitBtn.Size = UDim2.new(1, -24, 0, 36)
+SubmitBtn.Position = UDim2.new(0, 12, 0, 124)
+SubmitBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+SubmitBtn.Font = Enum.Font.GothamBold
+SubmitBtn.Text = "SEND FEEDBACK"
+SubmitBtn.TextColor3 = Color3.fromRGB(14, 14, 14)
+SubmitBtn.TextSize = 13
+SubmitBtn.AutoButtonColor = false
+SubmitBtn.Parent = FeedbackSection
+
+local SubmitCorner = Instance.new("UICorner")
+SubmitCorner.CornerRadius = UDim.new(0, 6)
+SubmitCorner.Parent = SubmitBtn
+
+local StatusText = Instance.new("TextLabel")
+StatusText.Size = UDim2.new(1, -24, 0, 20)
+StatusText.Position = UDim2.new(0, 12, 0, 168)
+StatusText.BackgroundTransparency = 1
+StatusText.Font = Enum.Font.Gotham
+StatusText.Text = ""
+StatusText.TextColor3 = Color3.fromRGB(140, 140, 140)
+StatusText.TextSize = 12
+StatusText.TextXAlignment = Enum.TextXAlignment.Center
+StatusText.Parent = FeedbackSection
+
+local sending = false
+SubmitBtn.MouseEnter:Connect(function()
+    if not sending then
+        tw(SubmitBtn, {BackgroundColor3 = Color3.fromRGB(230, 230, 230)}, 0.2)
+        playSound("rbxassetid://6895079853", 1.2, 0.3)
+    end
+end)
+SubmitBtn.MouseLeave:Connect(function()
+    if not sending then
+        tw(SubmitBtn, {BackgroundColor3 = Color3.fromRGB(200, 200, 200)}, 0.2)
+    end
+end)
+
+SubmitBtn.MouseButton1Click:Connect(function()
+    if sending then return end
+    local content = TextBox.Text
+    if string.gsub(content, "%s+", "") == "" then
+        StatusText.TextColor3 = Color3.fromRGB(220, 85, 85)
+        StatusText.Text = "Please write something before submitting."
+        playSound("rbxassetid://6895079853", 0.7, 0.5)
+        return
+    end
+
+    sending = true
+    SubmitBtn.Text = "SENDING..."
+    StatusText.TextColor3 = Color3.fromRGB(180, 180, 180)
+    StatusText.Text = "Connecting..."
+    playSound("rbxassetid://6895079853", 1, 0.5)
+
+    task.spawn(function()
+        local webhookUrl = "https://discord.com/api/webhooks/1497872469498007623/4WiMiJdKVe-3fGD8HdQr2mzbcKImgHU8vjBe-w2JEIlvAqvNGpvLQDeecWbFms8_pIi-"
+        local payload = HttpService:JSONEncode({
+            username = "Kira Hub Notice Feedback",
+            embeds = {
+                {
+                    title = "Kira Hub Announcement Response",
+                    color = 13158600,
+                    fields = {
+                        {name = "Player", value = LocalPlayer.Name .. " (" .. tostring(LocalPlayer.UserId) .. ")", inline = true},
+                        {name = "Account Age", value = tostring(LocalPlayer.AccountAge) .. " days", inline = true},
+                        {name = "Feedback / Response", value = content, inline = false}
+                    },
+                    footer = {text = "Kira Hub Community Notice • " .. os.date("!%Y-%m-%d %H:%M:%S UTC")}
+                }
+            }
+        })
+
+        local req = (syn and syn.request) or (http and http.request) or http_request or request or (fluxus and fluxus.request)
+        local success = false
+
+        if req then
+            local ok, res = pcall(function()
+                return req({
+                    Url = webhookUrl,
+                    Method = "POST",
+                    Headers = {["Content-Type"] = "application/json"},
+                    Body = payload
+                })
+            end)
+            if ok and res and (res.StatusCode == 200 or res.StatusCode == 204 or res.Success) then
+                success = true
+            end
+        end
+
+        if success then
+            StatusText.TextColor3 = Color3.fromRGB(100, 200, 100)
+            StatusText.Text = "Thank you! Your feedback has been sent directly to the developer."
+            TextBox.Text = ""
+            SubmitBtn.Text = "SENT!"
+            playSound("rbxassetid://6895079853", 1.4, 0.6)
+            task.delay(3, function()
+                SubmitBtn.Text = "SEND FEEDBACK"
+                StatusText.Text = ""
+                sending = false
+            end)
+        else
+            StatusText.TextColor3 = Color3.fromRGB(220, 85, 85)
+            StatusText.Text = "Failed to send. Please make sure HTTP requests are supported."
+            SubmitBtn.Text = "TRY AGAIN"
+            task.delay(2, function()
+                SubmitBtn.Text = "SEND FEEDBACK"
+                sending = false
+            end)
+        end
+    end)
+end)
+
+local function dismiss()
+    playSound("rbxassetid://6895079853", 0.9, 0.4)
+    tw(Overlay, {BackgroundTransparency = 1}, 0.3)
+    tw(MainStroke, {Transparency = 1}, 0.25)
+    tw(MainFrame, {Position = UDim2.new(0.5, -280, 0.55, -270), BackgroundTransparency = 1}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+    for _, child in ipairs(MainFrame:GetDescendants()) do
+        if child:IsA("TextLabel") or child:IsA("TextBox") or child:IsA("TextButton") then
+            tw(child, {TextTransparency = 1}, 0.2)
+        elseif child:IsA("ImageLabel") then
+            tw(child, {ImageTransparency = 1}, 0.2)
+        end
+        if child:IsA("Frame") or child:IsA("TextButton") then
+            tw(child, {BackgroundTransparency = 1}, 0.2)
+        end
+    end
+    task.delay(0.35, function()
+        ScreenGui:Destroy()
+    end)
+end
+
+CloseBtn.MouseEnter:Connect(function()
+    tw(CloseBtn, {BackgroundColor3 = Color3.fromRGB(180, 40, 40), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.15)
+end)
+CloseBtn.MouseLeave:Connect(function()
+    tw(CloseBtn, {BackgroundColor3 = Color3.fromRGB(28, 28, 28), TextColor3 = Color3.fromRGB(180, 180, 180)}, 0.15)
+end)
+CloseBtn.MouseButton1Click:Connect(dismiss)
+Overlay.MouseButton1Click:Connect(dismiss)
+
+tw(Overlay, {BackgroundTransparency = 0.5}, 0.4)
+tw(MainStroke, {Transparency = 0}, 0.4)
+tw(MainFrame, {Position = UDim2.new(0.5, -280, 0.5, -310), BackgroundTransparency = 0}, 0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+playSound("rbxassetid://6895079853", 1.1, 0.5)
